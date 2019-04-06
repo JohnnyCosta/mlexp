@@ -13,6 +13,8 @@ if __name__ == "__main__":
 
     model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
+    model.summary()
+
     train_datagen = ImageDataGenerator(
         rescale=1. / 255,
         shear_range=0.2,

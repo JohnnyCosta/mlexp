@@ -7,8 +7,10 @@ from keras.preprocessing import image
 from keras.preprocessing.image import ImageDataGenerator
 
 
+img_width, img_height = 150, 150
+
 def load_image(img_path, show=False):
-    img = image.load_img(img_path, target_size=(64, 64))
+    img = image.load_img(img_path, target_size=(img_width, img_height))
     img_tensor = image.img_to_array(img)
     img_tensor = np.expand_dims(img_tensor, axis=0)
     img_tensor /= 255.
@@ -26,8 +28,8 @@ if __name__ == "__main__":
     model.load_weights('weights.h5')
 
     # img_path = 'dataset/predict_set/June_odd-eyed-cat_cropped.jpg'
-    img_path = 'dataset/predict_set/puppy-dog.jpg'
-    # img_path = 'dataset/predict_set/BMW-TA.jpg'
+    img_path = 'dataset/predict_set/golden-retriever-puppy.jpg'
+    # img_path = 'dataset/predict_set/cat.jpg'
 
     new_image = load_image(img_path, show=False)
 

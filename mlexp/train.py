@@ -2,6 +2,9 @@ import matplotlib.pyplot as plt
 from keras.layers import Dense, Flatten, MaxPooling2D, Conv2D
 from keras.models import Sequential
 from keras.preprocessing.image import ImageDataGenerator
+import numpy as np
+
+batch_size = 256
 
 if __name__ == "__main__":
     model = Sequential()
@@ -25,19 +28,22 @@ if __name__ == "__main__":
 
     training_set = train_datagen.flow_from_directory('dataset/training_set',
                                                      target_size=(64, 64),
-                                                     batch_size=32,
+                                                     batch_size=batch_size,
                                                      class_mode='binary')
 
     test_set = test_datagen.flow_from_directory('dataset/test_set',
                                                 target_size=(64, 64),
-                                                batch_size=32,
+                                                batch_size=batch_size,
                                                 class_mode='binary')
     history = model.fit_generator(
         training_set,
-        steps_per_epoch=500,
-        epochs=3,
+        steps_per_epoch=int(np.ceil(training_set.samples / float(batch_size))),
+        epochs=15,
         validation_data=test_set,
-        validation_steps=10)
+        validation_steps=int(np.ceil(test_set.samples / float(batch_size))),
+        workers=4
+    )
+
 
     model.save('model.h5')
     model.save_weights('weights.h5')

@@ -25,7 +25,8 @@ setup(
     install_requires=[
         'keras',
         'h5py',
-        'numpy'
+        'numpy',
+        'pillow'
     ],
     include_package_data=True,
     zip_safe=False

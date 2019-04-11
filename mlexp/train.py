@@ -9,10 +9,12 @@ from keras.preprocessing.image import ImageDataGenerator
 from tensorflow.python.lib.io import file_io
 import numpy as np
 import os
+import zipfile
 
 batch_size = 256
 img_width, img_height = 150, 150
-epochs = 1
+epochs = 100
+data_set = 'dataset'
 
 K.set_image_data_format('channels_last')
 
@@ -43,9 +45,21 @@ def model(input_shape):
     return model
 
 
+def unzip(job_dir):
+    print('copying file')
+    with file_io.FileIO(job_dir + data_set + '.zip', mode='br') as input_f:
+        with file_io.FileIO(data_set + '.zip', mode='bw+') as output_f:
+            output_f.write(input_f.read())
+    print('unzipping file')
+    with zipfile.ZipFile(data_set + '.zip',"r") as zip_ref:
+        zip_ref.extractall()
+    print('finished to unzip')
+
 def main(job_dir, **args):
     os.makedirs(job_dir + 'logs/', exist_ok=True)
     logs_path = job_dir + 'logs/tensorboard'
+
+    unzip(job_dir)
 
     train_datagen = ImageDataGenerator(
         rescale=1. / 255,
@@ -55,12 +69,12 @@ def main(job_dir, **args):
 
     test_datagen = ImageDataGenerator(rescale=1. / 255)
 
-    training_set = train_datagen.flow_from_directory(job_dir +'dataset/training_set',
+    training_set = train_datagen.flow_from_directory(data_set +'/training_set',
                                                      target_size=(img_width, img_height),
                                                      batch_size=batch_size,
                                                      class_mode='binary')
 
-    test_set = test_datagen.flow_from_directory(job_dir +'dataset/test_set',
+    test_set = test_datagen.flow_from_directory(data_set +'/test_set',
                                                 target_size=(img_width, img_height),
                                                 batch_size=batch_size,
                                                 class_mode='binary')

@@ -28,12 +28,13 @@ if __name__ == "__main__":
     model.load_weights('weights.h5')
 
     # img_path = 'dataset/predict_set/June_odd-eyed-cat_cropped.jpg'
-    img_path = 'dataset/predict_set/golden-retriever-puppy.jpg'
+    # img_path = 'dataset/predict_set/golden-retriever-puppy.jpg'
     # img_path = 'dataset/predict_set/cat.jpg'
+    img_path = 'dataset/predict_set/car.jpg'
 
     new_image = load_image(img_path, show=False)
 
     pred = model.predict(new_image)
 
-    print('Is this a cat? %s' % pred[0])
-    # print('Is this a Dog? %s' % pred[1])
+    print('Is this a cat or dog? %s' % pred[0])
+    # print('Is this a cat or dog? %s' % pred[1])

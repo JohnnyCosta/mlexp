@@ -6,9 +6,9 @@ def readme():
         return f.read()
 
 setup(
-    name=mlexp,
+    name='mlexp',
     version='0.1',
-    description=,
+    description='keras on gcloud ml-engine',
     long_description=readme(),
     classifiers=[
         'Development Status :: 3 - Alpha',
@@ -20,10 +20,12 @@ setup(
     url='https://github.com//mlexp',
     author='',
     # author_email='@gmail.com',
-    license=MIT,
+    license='MIT',
     packages=['mlexp'],
     install_requires=[
-        'markdown',
+        'keras',
+        'h5py',
+        'numpy'
     ],
     include_package_data=True,
     zip_safe=False

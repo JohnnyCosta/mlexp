@@ -1,13 +1,15 @@
-import os
+import argparse
 
+import keras.backend as K
 import matplotlib.pyplot as plt
 import numpy as np
 from keras.models import load_model
 from keras.preprocessing import image
-from keras.preprocessing.image import ImageDataGenerator
-
 
 img_width, img_height = 150, 150
+
+K.set_image_data_format('channels_last')
+
 
 def load_image(img_path, show=False):
     img = image.load_img(img_path, target_size=(img_width, img_height))
@@ -23,12 +25,11 @@ def load_image(img_path, show=False):
     return img_tensor
 
 
-if __name__ == "__main__":
-    model = load_model('model.h5')
-    model.load_weights('weights.h5')
+def main(job_dir, **args):
+    model = load_model(job_dir + 'model/model.h5')
+    model.load_weights(job_dir + 'weights/weights.h5')
 
-    # img_path = 'dataset/predict_set/June_odd-eyed-cat_cropped.jpg'
-    # img_path = 'dataset/predict_set/golden-retriever-puppy.jpg'
+    # img_path = 'dataset/predict_set/dog.jpg'
     # img_path = 'dataset/predict_set/cat.jpg'
     img_path = 'dataset/predict_set/car.jpg'
 
@@ -36,5 +37,20 @@ if __name__ == "__main__":
 
     pred = model.predict(new_image)
 
+
     print('Is this a cat or dog? %s' % pred[0])
-    # print('Is this a cat or dog? %s' % pred[1])
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+
+    # Input Arguments
+    parser.add_argument(
+        '--job-dir',
+        help='location to write checkpoints and export models',
+        required=True
+    )
+    args = parser.parse_args()
+    arguments = args.__dict__
+
+    main(**arguments)

@@ -1,15 +1,15 @@
 import argparse
+import os
+import zipfile
 
-import keras as keras
 import keras.backend as K
+import numpy as np
+import tensorflow as tf
 from keras import callbacks
 from keras.layers import Input, Dense, Flatten, MaxPooling2D, Conv2D, Activation, Dropout
 from keras.models import Model
 from keras.preprocessing.image import ImageDataGenerator
 from tensorflow.python.lib.io import file_io
-import numpy as np
-import os
-import zipfile
 
 batch_size = 256
 img_width, img_height = 150, 150
@@ -51,80 +51,81 @@ def unzip(job_dir):
         with file_io.FileIO(data_set + '.zip', mode='bw+') as output_f:
             output_f.write(input_f.read())
     print('unzipping file')
-    with zipfile.ZipFile(data_set + '.zip',"r") as zip_ref:
+    with zipfile.ZipFile(data_set + '.zip', "r") as zip_ref:
         zip_ref.extractall()
     print('finished to unzip')
 
+
 def main(job_dir, **args):
-    os.makedirs(job_dir + 'logs/', exist_ok=True)
-    logs_path = job_dir + 'logs/tensorboard'
+    with tf.device('/gpu:0'):
+        os.makedirs(job_dir + 'logs/', exist_ok=True)
+        logs_path = job_dir + 'logs/tensorboard'
 
-    unzip(job_dir)
+        unzip(job_dir)
 
-    train_datagen = ImageDataGenerator(
-        rescale=1. / 255,
-        shear_range=0.2,
-        zoom_range=0.2,
-        horizontal_flip=True)
+        train_datagen = ImageDataGenerator(
+            rescale=1. / 255,
+            shear_range=0.2,
+            zoom_range=0.2,
+            horizontal_flip=True)
 
-    test_datagen = ImageDataGenerator(rescale=1. / 255)
+        test_datagen = ImageDataGenerator(rescale=1. / 255)
 
-    training_set = train_datagen.flow_from_directory(data_set +'/training_set',
-                                                     target_size=(img_width, img_height),
-                                                     batch_size=batch_size,
-                                                     class_mode='binary')
+        training_set = train_datagen.flow_from_directory(data_set + '/training_set',
+                                                         target_size=(img_width, img_height),
+                                                         batch_size=batch_size,
+                                                         class_mode='binary')
 
-    test_set = test_datagen.flow_from_directory(data_set +'/test_set',
-                                                target_size=(img_width, img_height),
-                                                batch_size=batch_size,
-                                                class_mode='binary')
+        test_set = test_datagen.flow_from_directory(data_set + '/test_set',
+                                                    target_size=(img_width, img_height),
+                                                    batch_size=batch_size,
+                                                    class_mode='binary')
 
-    m = model((img_width, img_height, 3))
+        m = model((img_width, img_height, 3))
 
-    m.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+        m.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
 
-    m.summary()
+        m.summary()
 
-    tensorboard = callbacks.TensorBoard(log_dir=logs_path, histogram_freq=0, write_graph=True, write_images=True)
+        tensorboard = callbacks.TensorBoard(log_dir=logs_path, histogram_freq=0, write_graph=True, write_images=True)
 
-    history = m.fit_generator(
-        training_set,
-        steps_per_epoch=int(np.ceil(training_set.samples / float(batch_size))),
-        epochs=epochs,
-        validation_data=test_set,
-        validation_steps=int(np.ceil(test_set.samples / float(batch_size))),
-        workers=4,
-        callbacks=[tensorboard]
-    )
+        history = m.fit_generator(
+            training_set,
+            steps_per_epoch=int(np.ceil(training_set.samples / float(batch_size))),
+            epochs=epochs,
+            validation_data=test_set,
+            validation_steps=int(np.ceil(test_set.samples / float(batch_size))),
+            workers=4,
+            callbacks=[tensorboard]
+        )
 
-    m.save('model.h5')
-    os.makedirs(job_dir + 'model/', exist_ok=True)
-    with file_io.FileIO('model.h5', mode='br') as input_f:
-        with file_io.FileIO(job_dir + 'model/model.h5', mode='bw+') as output_f:
-            output_f.write(input_f.read())
+        m.save('model.h5')
+        os.makedirs(job_dir + 'model/', exist_ok=True)
+        with file_io.FileIO('model.h5', mode='br') as input_f:
+            with file_io.FileIO(job_dir + 'model/model.h5', mode='bw+') as output_f:
+                output_f.write(input_f.read())
 
+        m.save_weights('weights.h5')
+        os.makedirs(job_dir + 'weights/', exist_ok=True)
+        with file_io.FileIO('weights.h5', mode='br') as input_f:
+            with file_io.FileIO(job_dir + 'weights/weights.h5', mode='bw+') as output_f:
+                output_f.write(input_f.read())
 
-    m.save_weights('weights.h5')
-    os.makedirs(job_dir + 'weights/', exist_ok=True)
-    with file_io.FileIO('weights.h5', mode='br') as input_f:
-        with file_io.FileIO(job_dir + 'weights/weights.h5', mode='bw+') as output_f:
-            output_f.write(input_f.read())
-
-    # plt.plot(history.history['acc'])
-    # plt.plot(history.history['val_acc'])
-    # plt.title('model accuracy')
-    # plt.ylabel('accuracy')
-    # plt.xlabel('epoch')
-    # plt.legend(['train', 'test'], loc='upper left')
-    # plt.show()
-    #
-    # plt.plot(history.history['loss'])
-    # plt.plot(history.history['val_loss'])
-    # plt.title('model loss')
-    # plt.ylabel('loss')
-    # plt.xlabel('epoch')
-    # plt.legend(['train', 'test'], loc='upper left')
-    # plt.show()
+        # plt.plot(history.history['acc'])
+        # plt.plot(history.history['val_acc'])
+        # plt.title('model accuracy')
+        # plt.ylabel('accuracy')
+        # plt.xlabel('epoch')
+        # plt.legend(['train', 'test'], loc='upper left')
+        # plt.show()
+        #
+        # plt.plot(history.history['loss'])
+        # plt.plot(history.history['val_loss'])
+        # plt.title('model loss')
+        # plt.ylabel('loss')
+        # plt.xlabel('epoch')
+        # plt.legend(['train', 'test'], loc='upper left')
+        # plt.show()
 
 
 if __name__ == "__main__":

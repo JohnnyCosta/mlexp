@@ -3,3 +3,7 @@ matplotlib
 numpy
 h5py
 pillow
+face_recognition
+opencv-python
+dlib
+cmake

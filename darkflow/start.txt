@@ -1,0 +1,4 @@
+python flow --model ./id/id-yolo-voc.cfg --load ./bin/tiny-yolo-voc.weights --train --annotation ./id/annotations --dataset ./id/images --epoch 2000 --save 400 --load 56
+python flow --model ./id/id-yolo-voc.cfg --load 633  --savepb
+python flow --model ./id/id-yolo-voc.cfg --pbLoad ./built_graph/id-yolo-voc.pb --metaLoad ./built_graph/id-yolo-voc.meta  --demo camera
+python flow --model ./id/id-yolo-voc.cfg --imgdir ./id/predict_set/  --pbLoad ./built_graph/id-yolo-voc.pb --metaLoad ./built_graph/id-yolo-voc.meta --json
